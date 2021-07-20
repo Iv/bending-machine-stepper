@@ -15,8 +15,7 @@ Ticker command_reader_ticker(&readCommand, 50);
 
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(9600);
 
   stepper.setEnablePin(4);
