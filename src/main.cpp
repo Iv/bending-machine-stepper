@@ -5,7 +5,7 @@
 
 
 const long SMALL_STEP = 200;
-const float SPEED = 400;
+const float SPEED = 600;
 const long RANGE = 10000;
 
 AccelStepper stepper_l(AccelStepper::DRIVER, 2, 3); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
@@ -67,7 +67,7 @@ void setup() {
 
   btn_ll.attachClick(&btn_ll_click);
   btn_lr.attachClick(&btn_lr_click);
-  btn_rl.attachClick(&btn_rl_click);
+  btn_rl.attachClick(&btn_rl_click);  
   btn_rr.attachClick(&btn_rr_click);
 
   btn_ll.attachLongPressStart(&btn_ll_long_press_start);
@@ -90,16 +90,15 @@ void setup() {
 
 void loop() {
 
-  stepper_l.run();
-  stepper_r.run();
-  command_reader_ticker.update();{
-  if(stepper_l.isRunning()) stepper_l.stop();
-  stepper_l.setSpeed(-SPEED);
-}
+  if(!btn_ll.isLongPressed() && !btn_lr.isLongPressed()) stepper_l.run();
+  if(!btn_rl.isLongPressed() && !btn_rr.isLongPressed()) stepper_r.run();
+
   btn_ll.tick();
   btn_lr.tick();
   btn_rl.tick();
   btn_rr.tick();
+
+  command_reader_ticker.update();
 }
 
 void readCommand(){
@@ -158,16 +157,23 @@ void btn_rr_long_press_start(){
 }
 
 
-void btn_ll_long_press_stop(){
+void btn_ll_long_press_stop()
+{
   stepper_l.setSpeed(0);
+  stepper_l.stop();
 }
+
 void btn_lr_long_press_stop(){
   stepper_l.setSpeed(0);
+  stepper_l.stop();
 }
 
 void btn_rl_long_press_stop(){
   stepper_r.setSpeed(0);
+  stepper_r.stop();
 }
+
 void btn_rr_long_press_stop(){
   stepper_r.setSpeed(0);
+  stepper_r.stop();
 }
