@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Ticker.h>
 #include <AccelStepper.h>
 #include <OneButton.h>
 
@@ -12,8 +11,8 @@ const long ACCELERATION = 1500;
 bool stepper_l_stopping = false;
 bool stepper_r_stopping = false;
 
-AccelStepper stepper_l(AccelStepper::DRIVER, 2, 3); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
-AccelStepper stepper_r(AccelStepper::DRIVER, 5, 6); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
+AccelStepper stepper_l(AccelStepper::DRIVER, 2, 3); 
+AccelStepper stepper_r(AccelStepper::DRIVER, 5, 6); 
 
 OneButton btn_ll(8, true, true);
 OneButton btn_lr(9, true, true);
@@ -21,8 +20,6 @@ OneButton btn_rl(10, true, true);
 OneButton btn_rr(11, true, true);
 
 
-
-void readCommand();
 void btn_ll_click();
 void btn_lr_click();
 void btn_rl_click();
@@ -47,8 +44,6 @@ void btn_rl_long_press_press() {stepper_r.runSpeed();}
 void btn_rr_long_press_press() {stepper_r.runSpeed();}
 
 
-Ticker command_reader_ticker(&readCommand, 50);
-
 
 void setup() {
 
@@ -65,7 +60,6 @@ void setup() {
   stepper_r.setMaxSpeed(MAX_SPEED);
   stepper_r.setAcceleration(ACCELERATION);
   
-  command_reader_ticker.start();
 
   btn_ll.attachClick(&btn_ll_click);
   btn_lr.attachClick(&btn_lr_click);
@@ -89,88 +83,70 @@ void setup() {
   btn_rr.attachDuringLongPress(&btn_rr_long_press_press);
 }
 
+void stepper_tick(AccelStepper *stepper, bool *flag) {
+  if(*flag){
+    stepper->runSpeed();
+    if(!stepper->isRunning()) *flag = false;
+  } else {
+    stepper->run();
+  }
+}
+
 
 void loop() {
 
-  if(!btn_ll.isLongPressed() && !btn_lr.isLongPressed()) stepper_l.run();
-  if(!btn_rl.isLongPressed() && !btn_rr.isLongPressed()) stepper_r.run();
+  if(!btn_ll.isLongPressed() && !btn_lr.isLongPressed()) {
+    stepper_tick(&stepper_l, &stepper_l_stopping);
+  }
+
+  if(!btn_rl.isLongPressed() && !btn_rr.isLongPressed()) {
+    stepper_tick(&stepper_r, &stepper_r_stopping);
+  }
 
   btn_ll.tick();
   btn_lr.tick();
   btn_rl.tick();
   btn_rr.tick();
-
-  command_reader_ticker.update();
 }
 
-void readCommand(){
-  if (Serial.available() > 0) {
-    // int command = Serial.read();
-
-    // switch (command)
-    
-    // default:
-    //   break;
-    // }
-  }
+void stepper_small_step(AccelStepper *stepper, long step) {
+  stepper->moveTo(stepper->targetPosition() + step);
 }
 
+void btn_ll_click() { stepper_small_step(&stepper_l, -SMALL_STEP);}
+void btn_lr_click() { stepper_small_step(&stepper_l, SMALL_STEP);}
 
-void btn_ll_click(){
-  stepper_l.moveTo(stepper_l.targetPosition() - SMALL_STEP);
+void btn_rl_click() { stepper_small_step(&stepper_r, -SMALL_STEP);}
+void btn_rr_click() { stepper_small_step(&stepper_r, SMALL_STEP);}
+
+
+void set_stepper_speed(AccelStepper *stepper, float speed){
+    if(stepper->isRunning()) stepper->stop();
+    stepper->setSpeed(speed);
 }
 
-void btn_lr_click(){
-  stepper_l.moveTo(stepper_l.targetPosition() + SMALL_STEP);
-}
+void btn_ll_long_press_start() { set_stepper_speed(&stepper_l, -SPEED); }
+void btn_lr_long_press_start(){ set_stepper_speed(&stepper_l, SPEED); }
 
-void btn_rl_click() {
-  stepper_r.moveTo(stepper_r.targetPosition() - SMALL_STEP);
-}
-
-void btn_rr_click(){
-  stepper_r.moveTo(stepper_r.targetPosition() + SMALL_STEP);
-}
+void btn_rl_long_press_start(){ set_stepper_speed(&stepper_r, -SPEED); }
+void btn_rr_long_press_start(){ set_stepper_speed(&stepper_r, SPEED); }
 
 
-
-void btn_ll_long_press_start() {
-  if(stepper_l.isRunning()) stepper_l.stop();
-  stepper_l.setSpeed(-SPEED);
-}
-
-void btn_lr_long_press_start(){
-  if(stepper_l.isRunning()) stepper_l.stop();
-  stepper_l.setSpeed(SPEED);
-}
-
-void btn_rl_long_press_start(){
-  if(stepper_r.isRunning()) stepper_r.stop();
-  stepper_r.setSpeed(-SPEED);
-}
-void btn_rr_long_press_start(){
-  if(stepper_r.isRunning()) stepper_r.stop();
-  stepper_r.setSpeed(SPEED);
-}
-
-
-void btn_ll_long_press_stop()
-{
+void stepper_l_stop() {
   stepper_l.setSpeed(0);
   stepper_l.moveTo(stepper_l.currentPosition());
+  stepper_l_stopping = true;
 }
 
-void btn_lr_long_press_stop(){
-  stepper_l.setSpeed(0);
-  stepper_l.moveTo(stepper_l.currentPosition());
-}
+void btn_ll_long_press_stop() { stepper_l_stop(); }
+void btn_lr_long_press_stop() { stepper_l_stop(); }
 
-void btn_rl_long_press_stop(){
+
+void stepper_r_stop() {
   stepper_r.stop();
   stepper_r.moveTo(stepper_r.currentPosition());
+  stepper_r_stopping = true;
 }
 
-void btn_rr_long_press_stop(){
-  stepper_r.stop();
-  stepper_r.moveTo(stepper_r.currentPosition());
-}
+void btn_rl_long_press_stop(){ stepper_r_stop();}
+void btn_rr_long_press_stop(){ stepper_r_stop();}
