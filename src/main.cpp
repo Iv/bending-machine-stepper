@@ -4,10 +4,10 @@
 #include <OneButton.h>
 
 
-const long SMALL_STEP = 200;
-const float SPEED = 1000;
+const long SMALL_STEP = 100;
+const float SPEED = 2000;
 const long MAX_SPEED = 4000;
-const long ACCELERATION = 1000;
+const long ACCELERATION = 1500;
 
 bool stepper_l_stopping = false;
 bool stepper_r_stopping = false;
@@ -156,21 +156,21 @@ void btn_rr_long_press_start(){
 
 void btn_ll_long_press_stop()
 {
-  stepper_l.stop();
-  stepper_l_stopping = true;
+  stepper_l.setSpeed(0);
+  stepper_l.moveTo(stepper_l.currentPosition());
 }
 
 void btn_lr_long_press_stop(){
-  stepper_l.stop();
-  stepper_l_stopping = true;
+  stepper_l.setSpeed(0);
+  stepper_l.moveTo(stepper_l.currentPosition());
 }
 
 void btn_rl_long_press_stop(){
   stepper_r.stop();
-  stepper_r_stopping = true;
+  stepper_r.moveTo(stepper_r.currentPosition());
 }
 
 void btn_rr_long_press_stop(){
   stepper_r.stop();
-  stepper_r_stopping = true;
+  stepper_r.moveTo(stepper_r.currentPosition());
 }
