@@ -5,8 +5,12 @@
 
 
 const long SMALL_STEP = 200;
-const float SPEED = 600;
-const long RANGE = 10000;
+const float SPEED = 1000;
+const long MAX_SPEED = 4000;
+const long ACCELERATION = 1000;
+
+bool stepper_l_stopping = false;
+bool stepper_r_stopping = false;
 
 AccelStepper stepper_l(AccelStepper::DRIVER, 2, 3); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
 AccelStepper stepper_r(AccelStepper::DRIVER, 5, 6); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
@@ -52,17 +56,15 @@ void setup() {
 
   stepper_l.setEnablePin(4);
   stepper_l.setPinsInverted(true, true, false);
-  stepper_l.setMaxSpeed(4000);
-  stepper_l.setAcceleration(1000);
-  stepper_l.moveTo(RANGE);
-
+  stepper_l.setMaxSpeed(MAX_SPEED);
+  stepper_l.setAcceleration(ACCELERATION);
+  
 
   stepper_r.setEnablePin(7);
   stepper_r.setPinsInverted(true, true, false);
-  stepper_r.setMaxSpeed(4000);
-  stepper_r.setAcceleration(1000);
-  stepper_r.moveTo(RANGE);
-
+  stepper_r.setMaxSpeed(MAX_SPEED);
+  stepper_r.setAcceleration(ACCELERATION);
+  
   command_reader_ticker.start();
 
   btn_ll.attachClick(&btn_ll_click);
@@ -103,35 +105,30 @@ void loop() {
 
 void readCommand(){
   if (Serial.available() > 0) {
-    int command = Serial.read();
+    // int command = Serial.read();
 
-    switch (command)
-    {
+    // switch (command)
     
-    default:
-      break;
-    }
+    // default:
+    //   break;
+    // }
   }
 }
 
 
 void btn_ll_click(){
-  Serial.println("btn_ll_click");
   stepper_l.moveTo(stepper_l.targetPosition() - SMALL_STEP);
 }
 
 void btn_lr_click(){
-  Serial.println("btn_lr_click");
   stepper_l.moveTo(stepper_l.targetPosition() + SMALL_STEP);
 }
 
 void btn_rl_click() {
-  Serial.println("btn_rl_click");
   stepper_r.moveTo(stepper_r.targetPosition() - SMALL_STEP);
 }
 
 void btn_rr_click(){
-  Serial.println("btn_rr_click");
   stepper_r.moveTo(stepper_r.targetPosition() + SMALL_STEP);
 }
 
@@ -159,21 +156,21 @@ void btn_rr_long_press_start(){
 
 void btn_ll_long_press_stop()
 {
-  stepper_l.setSpeed(0);
   stepper_l.stop();
+  stepper_l_stopping = true;
 }
 
 void btn_lr_long_press_stop(){
-  stepper_l.setSpeed(0);
   stepper_l.stop();
+  stepper_l_stopping = true;
 }
 
 void btn_rl_long_press_stop(){
-  stepper_r.setSpeed(0);
   stepper_r.stop();
+  stepper_r_stopping = true;
 }
 
 void btn_rr_long_press_stop(){
-  stepper_r.setSpeed(0);
   stepper_r.stop();
+  stepper_r_stopping = true;
 }
