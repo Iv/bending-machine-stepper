@@ -86,7 +86,11 @@ void setup() {
 void stepper_tick(AccelStepper *stepper, bool *breaking_flag) {
   if(*breaking_flag){
     stepper->runSpeed();
-    if(!stepper->isRunning()) *breaking_flag = false;
+
+    if(stepper->speed() == 0.0) {
+      *breaking_flag = false;
+      stepper->moveTo(stepper->currentPosition());
+    }
   } else {
     stepper->run();
   }
@@ -134,7 +138,6 @@ void btn_rr_long_press_start(){ set_stepper_speed(&stepper_r, SPEED); }
 
 void stepper_l_stop() {
   stepper_l.setSpeed(0);
-  // stepper_l.moveTo(stepper_l.currentPosition());
   stepper_l_stopping = true;
 }
 
@@ -144,7 +147,6 @@ void btn_lr_long_press_stop() { stepper_l_stop(); }
 
 void stepper_r_stop() {
   stepper_r.stop();
-  // stepper_r.moveTo(stepper_r.currentPosition());
   stepper_r_stopping = true;
 }
 
