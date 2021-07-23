@@ -3,11 +3,11 @@
 #include <OneButton.h>
 
 
-const long SMALL_STEP = 100;
-const float SPEED = 2000;
+const long SMALL_STEP = 50;
+const float SPEED = 4000;
 const long MAX_SPEED = 4000;
-const long ACCELERATION = 1500;
-const long LONG_PRESS_T = 400;
+const long ACCELERATION = 500;
+const long LONG_PRESS_T = 200;
 
 bool stepper_l_stopping = false;
 bool stepper_r_stopping = false;
