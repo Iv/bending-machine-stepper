@@ -89,7 +89,7 @@ void stepper_tick(AccelStepper *stepper, bool *breaking_flag) {
 
     if(stepper->speed() == 0.0) {
       *breaking_flag = false;
-      stepper->moveTo(stepper->currentPosition());
+      stepper->moveTo(stepper->currentPosition()); // Target position reset.
     }
   } else {
     stepper->run();
