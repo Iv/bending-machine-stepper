@@ -7,6 +7,7 @@ const long SMALL_STEP = 100;
 const float SPEED = 2000;
 const long MAX_SPEED = 4000;
 const long ACCELERATION = 1500;
+const long LONG_PRESS_T = 400;
 
 bool stepper_l_stopping = false;
 bool stepper_r_stopping = false;
@@ -60,6 +61,10 @@ void setup() {
   stepper_r.setMaxSpeed(MAX_SPEED);
   stepper_r.setAcceleration(ACCELERATION);
   
+  btn_ll.setPressTicks(LONG_PRESS_T);
+  btn_lr.setPressTicks(LONG_PRESS_T);
+  btn_rl.setPressTicks(LONG_PRESS_T);
+  btn_rr.setPressTicks(LONG_PRESS_T);
 
   btn_ll.attachClick(&btn_ll_click);
   btn_lr.attachClick(&btn_lr_click);
@@ -146,7 +151,7 @@ void btn_lr_long_press_stop() { stepper_l_stop(); }
 
 
 void stepper_r_stop() {
-  stepper_r.stop();
+  stepper_r.setSpeed(0);
   stepper_r_stopping = true;
 }
 
