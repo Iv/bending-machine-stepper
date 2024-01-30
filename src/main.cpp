@@ -3,11 +3,16 @@
 #include <OneButton.h>
 
 
-const long SMALL_STEP = 50;
-const float SPEED = 4000;
-const long MAX_SPEED = 4000;
-const long ACCELERATION = 300;
-const long LONG_PRESS_T = 300;
+const long SMALL_STEP = 10;
+
+const long TicksFastMove = 2000;
+const long TicksAcc = 4000;
+const float FastSpeed = 3000;
+
+const float SPEED = 1000;
+const long MAX_SPEED = 5000;
+const long ACCELERATION = 1500;
+const long LONG_PRESS_T = 400;
 
 bool stepper_l_stopping = false;
 bool stepper_r_stopping = false;
@@ -49,6 +54,12 @@ void btn_rr_long_press_press() { stepper_r.runSpeed(); }
 void setup() {
 
   Serial.begin(9600);
+  Serial.println("start");
+
+  pinMode(8, INPUT_PULLUP);
+  pinMode(9, INPUT_PULLUP);
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
 
   stepper_l.setEnablePin(4);
   stepper_l.setPinsInverted(true, true, false);
@@ -101,6 +112,10 @@ void stepper_tick(AccelStepper *stepper, bool *breaking_flag) {
   }
 }
 
+void set_stepper_speed(AccelStepper *stepper, float speed){
+    if(stepper->isRunning()) stepper->stop();
+    stepper->setSpeed(speed);
+}
 
 void loop() {
 
@@ -111,6 +126,12 @@ void loop() {
   if(!btn_rl.isLongPressed() && !btn_rr.isLongPressed()) {
     stepper_tick(&stepper_r, &stepper_r_stopping);
   }
+
+  //if ((btn_rl.getPressedTicks()>TicksFastMove)  && (btn_rl.getPressedTicks()<TicksAcc) && (stepper_r_stopping==false)){
+  //  set_stepper_speed(&stepper_r, -(btn_rl.getPressedTicks()-TicksFastMove)/(TicksAcc-btn_rl.getPressedTicks())*FastSpeed);
+  //}
+
+
 
   btn_ll.tick();
   btn_lr.tick();
@@ -127,12 +148,6 @@ void btn_lr_click() { stepper_small_step(&stepper_l, SMALL_STEP);}
 
 void btn_rl_click() { stepper_small_step(&stepper_r, -SMALL_STEP);}
 void btn_rr_click() { stepper_small_step(&stepper_r, SMALL_STEP);}
-
-
-void set_stepper_speed(AccelStepper *stepper, float speed){
-    if(stepper->isRunning()) stepper->stop();
-    stepper->setSpeed(speed);
-}
 
 void btn_ll_long_press_start() { set_stepper_speed(&stepper_l, -SPEED); }
 void btn_lr_long_press_start(){ set_stepper_speed(&stepper_l, SPEED); }
